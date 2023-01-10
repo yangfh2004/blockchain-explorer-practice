@@ -1,0 +1,68 @@
+{
+"queries": ["Alice", "Bob"],
+"blocks": [
+  {
+    "block_id": "A",
+    "parent_id": null,
+    "transactions": [
+      {
+        "Mint": {
+          "tx_id": "A1",
+          "to": "Alice",
+          "amount": 10
+        }
+      },
+      {
+        "Transfer": {
+          "tx_id": "A0",
+          "from": "Alice",
+          "to": "Bob",
+          "amount": 5
+        }
+      }
+    ]
+  },
+  {
+    "block_id": "B",
+    "parent_id": "A",
+    "transactions": [
+      {
+        "Transfer": {
+          "tx_id": "B0",
+          "from": "Bob",
+          "to": "Alice",
+          "amount": 5
+        }
+      }
+    ]
+  },
+  {
+    "block_id": "C",
+    "parent_id": "A",
+    "transactions": [
+      {
+        "Transfer": {
+          "tx_id": "C0",
+          "from": "Bob",
+          "to": "Alice",
+          "amount": 3
+        }
+      }
+    ]
+  },
+  {
+    "block_id": "D",
+    "parent_id": "C",
+    "transactions": [
+      {
+        "Transfer": {
+          "tx_id": "D0",
+          "from": "Alice",
+          "to": "Bob",
+          "amount": 2
+        }
+      }
+    ]
+  }
+]
+}
