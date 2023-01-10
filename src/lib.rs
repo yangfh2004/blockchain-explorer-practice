@@ -45,7 +45,8 @@ impl Service for ServiceImpl {
     type Balance = String; //TODO: Decide how to represent balances
 
     fn new() -> Self {
-        todo!()
+        Self {
+        }
     }
 
     fn ingest_block(&mut self, _block: &Block) -> anyhow::Result<()> {

@@ -12,13 +12,13 @@ mod tests {
         if let Ok(balance) = expected_balance_alice {
             assert_eq!(service.get_balance(&blocks::ALICE).unwrap(), balance);
         } else {
-            todo!()
+            panic!("Alice's balance is not available!");
         }
 
         if let Ok(balance) = expected_balance_bob {
             assert_eq!(service.get_balance(&blocks::BOB).unwrap(), balance);
         } else {
-            todo!()
+            panic!("Bob's balance is not available!");
         }
     }
 
@@ -28,14 +28,14 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
     }
 
@@ -45,20 +45,20 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
     }
 
@@ -68,26 +68,27 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
+        // Balance is not enough, tx shall be rejected.
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
     }
 
@@ -97,26 +98,26 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("8".to_string()),
+            anyhow::Ok("2".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("8".to_string()),
+            anyhow::Ok("2".to_string()),
         );
     }
 
@@ -126,32 +127,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("8".to_string()),
+            anyhow::Ok("2".to_string()),
         );
     }
 
@@ -161,32 +162,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("10".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("8".to_string()),
+            anyhow::Ok("2".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("8".to_string()),
+            anyhow::Ok("2".to_string()),
         );
     }
 
@@ -196,32 +197,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("0".to_string()),
+            anyhow::Ok("0".to_string()),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            Err(anyhow!("Alice balance")),
-            Err(anyhow!("Bob balance")),
+            anyhow::Ok("5".to_string()),
+            anyhow::Ok("5".to_string()),
         );
     }
 }
