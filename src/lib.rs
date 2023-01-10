@@ -42,7 +42,7 @@ pub trait Service {
 pub struct ServiceImpl {}
 
 impl Service for ServiceImpl {
-    type Balance = String; //TODO: Decide how to represent balances
+    type Balance = u128;
 
     fn new() -> Self {
         Self {

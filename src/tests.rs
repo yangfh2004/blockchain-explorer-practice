@@ -28,14 +28,14 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
     }
 
@@ -45,20 +45,20 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
     }
 
@@ -68,27 +68,26 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        // Balance is not enough, tx shall be rejected.
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(8),
+            anyhow::Ok(2),
         );
     }
 
@@ -98,26 +97,26 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("8".to_string()),
-            anyhow::Ok("2".to_string()),
+            anyhow::Ok(8),
+            anyhow::Ok(2),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("8".to_string()),
-            anyhow::Ok("2".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
     }
 
@@ -127,32 +126,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(8),
+            anyhow::Ok(2),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("8".to_string()),
-            anyhow::Ok("2".to_string()),
+            anyhow::Ok(6),
+            anyhow::Ok(4),
         );
     }
 
@@ -162,32 +161,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("10".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("8".to_string()),
-            anyhow::Ok("2".to_string()),
+            anyhow::Ok(10),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("8".to_string()),
-            anyhow::Ok("2".to_string()),
+            anyhow::Ok(8),
+            anyhow::Ok(2),
         );
     }
 
@@ -197,32 +196,32 @@ mod tests {
         let mut service = ServiceImpl::new();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_D).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_B).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_C).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("0".to_string()),
-            anyhow::Ok("0".to_string()),
+            anyhow::Ok(0),
+            anyhow::Ok(0),
         );
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(
             &service,
-            anyhow::Ok("5".to_string()),
-            anyhow::Ok("5".to_string()),
+            anyhow::Ok(5),
+            anyhow::Ok(5),
         );
     }
 }
