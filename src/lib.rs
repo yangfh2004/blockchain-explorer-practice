@@ -65,26 +65,78 @@ impl Service for ServiceImpl {
     }
 
     fn ingest_block(&mut self, _block: &Block) -> anyhow::Result<()> {
+        // Blockchain as a state machine, transition into a new state.
+        fn state_transition(state: &mut HashMap<String, Account>, tx: &Transaction) {
+            match tx {
+                Transaction::Mint {
+                    tx_id: _,
+                    to,
+                    amount,
+                } => {
+                    if let Some(to_account) = state.get_mut(to) {
+                        to_account.balance += amount;
+                    } else {
+                        let account = Account {
+                            id: to.clone(),
+                            balance: *amount,
+                        };
+                        state.insert(to.clone(), account);
+                    }
+                }
+                Transaction::Transfer {
+                    tx_id: _,
+                    from,
+                    to,
+                    amount,
+                } => {
+                    if let Some(from_account) = state.get_mut(from) {
+                        if from_account.balance >= *amount {
+                            from_account.balance -= amount;
+                        }
+                    }
+                    if let Some(to_account) = state.get_mut(to) {
+                        to_account.balance += amount;
+                    } else {
+                        let to_account = Account {
+                            id: to.clone(),
+                            balance: *amount,
+                        };
+                        state.insert(to.clone(), to_account);
+                    }
+                }
+            }
+        }
+
         if let Some(parent) = _block.parent_id.clone() {
-            println!("parent id {}", parent);
+            // println!("parent id {}", parent);
             if let Some(idx) = self.leaf_blocks.get(&parent) {
                 self.chains[*idx].push(_block.clone());
-                self.leaf_blocks.insert(_block.block_id.clone(), idx.clone());
+                self.leaf_blocks
+                    .insert(_block.block_id.clone(), *idx);
                 self.leaf_blocks.remove(&parent);
                 for tx in &_block.transactions {
                     match tx {
-                        Transaction::Mint { tx_id, to, amount } => {
-                            let mut last_state = self.states.last_mut().unwrap();
-                            let mut account = last_state.get_mut(to).unwrap();
+                        Transaction::Mint {
+                            tx_id: _,
+                            to,
+                            amount,
+                        } => {
+                            let last_state = self.states.last_mut().unwrap();
+                            let account = last_state.get_mut(to).unwrap();
                             account.balance += amount;
-                        },
-                        Transaction::Transfer { tx_id, from, to, amount } => {
+                        }
+                        Transaction::Transfer {
+                            tx_id: _,
+                            from,
+                            to,
+                            amount,
+                        } => {
                             let balance = self.get_balance(from)?;
                             if *amount <= balance {
-                                let mut last_state = self.states.last_mut().unwrap();
-                                let mut to_account = last_state.get_mut(to).unwrap();
+                                let last_state = self.states.last_mut().unwrap();
+                                let to_account = last_state.get_mut(to).unwrap();
                                 to_account.balance += amount;
-                                let mut from_account = last_state.get_mut(from).unwrap();
+                                let from_account = last_state.get_mut(from).unwrap();
                                 from_account.balance -= amount;
                             }
                         }
@@ -99,7 +151,7 @@ impl Service for ServiceImpl {
                         if parent == block.block_id {
                             // fork from here.
                             let mut fork = Vec::new();
-                            for block in &chain[..(i+1)] {
+                            for block in &chain[..(i + 1)] {
                                 fork.push(block.clone());
                             }
                             fork.push(_block.clone());
@@ -107,82 +159,25 @@ impl Service for ServiceImpl {
                             let mut new_state: HashMap<String, Account> = HashMap::new();
                             for block in fork.clone() {
                                 for tx in &block.transactions {
-                                    match tx {
-                                        Transaction::Mint { tx_id, to, amount } => {
-                                            if let Some(to_account) = new_state.get_mut(to) {
-                                                to_account.balance += amount;
-                                            } else {
-                                                let mut account = Account {
-                                                    id: to.clone(),
-                                                    balance: amount.clone(),
-                                                };
-                                                new_state.insert(to.clone(), account);
-                                            }
-
-                                        },
-                                        Transaction::Transfer { tx_id, from, to, amount } => {
-                                            if let Some(from_account) = new_state.get_mut(from) {
-                                                if from_account.balance >= *amount {
-                                                    from_account.balance -= amount;
-                                                }
-                                            }
-                                            if let Some(to_account) = new_state.get_mut(to) {
-                                                to_account.balance += amount;
-                                            } else {
-                                                let mut to_account = Account {
-                                                    id: to.clone(),
-                                                    balance: amount.clone(),
-                                                };
-                                                new_state.insert(to.clone(), to_account);
-                                            }
-                                        }
-                                    }
+                                    state_transition(&mut new_state, tx);
                                 }
                             }
                             self.states.push(new_state);
                             self.chains.push(fork);
-                            self.leaf_blocks.insert(_block.block_id.clone(), self.chains.len()-1);
+                            self.leaf_blocks
+                                .insert(_block.block_id.clone(), self.chains.len() - 1);
                         }
                     }
                 }
             }
         } else {
-            let mut new_chain = Vec::new();
-            new_chain.push(_block.clone());
+            let new_chain = vec![_block.clone()];
             self.chains.push(new_chain);
-            self.leaf_blocks.insert(_block.block_id.clone(), self.chains.len()-1);
+            self.leaf_blocks
+                .insert(_block.block_id.clone(), self.chains.len() - 1);
             let mut new_state: HashMap<String, Account> = HashMap::new();
             for tx in &_block.transactions {
-                match tx {
-                    Transaction::Mint { tx_id, to, amount } => {
-                        if let Some(to_account) = new_state.get_mut(to) {
-                            to_account.balance += amount;
-                        } else {
-                            let mut account = Account {
-                                id: to.clone(),
-                                balance: amount.clone(),
-                            };
-                            new_state.insert(to.clone(), account);
-                        }
-
-                    },
-                    Transaction::Transfer { tx_id, from, to, amount } => {
-                        if let Some(from_account) = new_state.get_mut(from) {
-                            if from_account.balance >= *amount {
-                                from_account.balance -= amount;
-                            }
-                        }
-                        if let Some(to_account) = new_state.get_mut(to) {
-                            to_account.balance += amount;
-                        } else {
-                            let mut to_account = Account {
-                                id: to.clone(),
-                                balance: amount.clone(),
-                            };
-                            new_state.insert(to.clone(), to_account);
-                        }
-                    }
-                }
+                state_transition(&mut new_state, tx);
             }
             self.states.push(new_state);
         }
@@ -190,10 +185,19 @@ impl Service for ServiceImpl {
     }
 
     fn get_balance(&self, _account: &str) -> anyhow::Result<Self::Balance> {
-        let last_state = match self.states.last() {
-            Some(state) => state,
-            None => return anyhow::Ok(0),
-        };
+        if self.states.len() == 0 {
+            return anyhow::Ok(0);
+        }
+        // find canonical chain
+        let mut max_len = 0;
+        let mut idx: usize = 0;
+        for (i, state) in self.states.iter().enumerate() {
+            if state.len() >= max_len {
+                max_len = state.len();
+                idx = i;
+            }
+        }
+        let last_state = &self.states[idx];
         let account = last_state.get(_account).unwrap();
         anyhow::Ok(account.balance.clone())
     }

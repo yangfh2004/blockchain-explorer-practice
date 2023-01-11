@@ -2,7 +2,6 @@
 mod tests {
     use crate::blocks;
     use crate::{Service, ServiceImpl};
-    use anyhow::anyhow;
 
     fn assert_balances<S: Service>(
         service: &S,
@@ -26,202 +25,90 @@ mod tests {
     fn test_1() {
         // single block
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
     }
 
     #[test]
     fn test_2() {
         // single chain of blocks
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
     }
 
     #[test]
     fn test_3() {
         // multiple forks
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(8),
-            anyhow::Ok(2),
-        );
+        assert_balances(&service, anyhow::Ok(8), anyhow::Ok(2));
     }
 
     #[test]
     fn test_4() {
         // multiple forks, different order
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(8),
-            anyhow::Ok(2),
-        );
+        assert_balances(&service, anyhow::Ok(8), anyhow::Ok(2));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
     }
 
     #[test]
     fn test_5() {
         // multiple forks where the longest chain changes mid stream
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(8),
-            anyhow::Ok(2),
-        );
+        assert_balances(&service, anyhow::Ok(8), anyhow::Ok(2));
         service.ingest_block(&blocks::BLOCK_D).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(6),
-            anyhow::Ok(4),
-        );
+        assert_balances(&service, anyhow::Ok(6), anyhow::Ok(4));
     }
 
     #[test]
     fn test_6() {
         // multiple forks with the longest fork arriving out of order
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_D).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(10),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(8),
-            anyhow::Ok(2),
-        );
+        assert_balances(&service, anyhow::Ok(8), anyhow::Ok(2));
     }
 
     // multiple forks where the genesis block is the last to arrive
     #[test]
     fn test_7() {
         let mut service = ServiceImpl::new();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_D).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_B).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_C).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(0),
-            anyhow::Ok(0),
-        );
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
         service.ingest_block(&blocks::BLOCK_A).unwrap();
-        assert_balances(
-            &service,
-            anyhow::Ok(5),
-            anyhow::Ok(5),
-        );
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
     }
 }
