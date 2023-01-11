@@ -111,8 +111,7 @@ impl Service for ServiceImpl {
             // println!("parent id {}", parent);
             if let Some(idx) = self.leaf_blocks.get(&parent) {
                 self.chains[*idx].push(_block.clone());
-                self.leaf_blocks
-                    .insert(_block.block_id.clone(), *idx);
+                self.leaf_blocks.insert(_block.block_id.clone(), *idx);
                 self.leaf_blocks.remove(&parent);
                 for tx in &_block.transactions {
                     match tx {
@@ -185,7 +184,7 @@ impl Service for ServiceImpl {
     }
 
     fn get_balance(&self, _account: &str) -> anyhow::Result<Self::Balance> {
-        if self.states.len() == 0 {
+        if self.states.is_empty() {
             return anyhow::Ok(0);
         }
         // find canonical chain
@@ -199,6 +198,6 @@ impl Service for ServiceImpl {
         }
         let last_state = &self.states[idx];
         let account = last_state.get(_account).unwrap();
-        anyhow::Ok(account.balance.clone())
+        anyhow::Ok(account.balance)
     }
 }
