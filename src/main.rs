@@ -1,3 +1,5 @@
+#![feature(io_read_to_string)]
+
 use std::io;
 
 use blockchain_explorer::Block;
