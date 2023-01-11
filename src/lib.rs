@@ -9,6 +9,13 @@ type TransactionID = String;
 type BlockID = String;
 
 use std::collections::HashMap;
+use std::path::Path;
+use lmdb::{Database, DatabaseFlags, Environment, Transaction as DBTransaction, WriteFlags};
+use tempdir::TempDir;
+
+const DB_NAME: &str = "my_db";
+const DIR_NAME: &str = "./test_database";
+const DATA_KEY: &str = "data_key";
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum Transaction {
@@ -36,31 +43,93 @@ pub trait Service {
     type Balance: PartialEq + Eq + std::fmt::Debug;
 
     fn new() -> Self;
+    fn from_db(dir: &str, db_filename: &str) -> Self;
+    fn update_db(&mut self);
     fn ingest_block(&mut self, block: &Block) -> anyhow::Result<()>;
     fn get_balance(&self, account: &str) -> anyhow::Result<Self::Balance>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Account {
     pub id: String,
     pub balance: u64,
 }
 
-#[derive(Default)]
+#[derive(Default, serde::Serialize, serde::Deserialize)]
 pub struct ServiceImpl {
     pub states: Vec<HashMap<String, Account>>,
     pub chains: Vec<Vec<Block>>,
     pub leaf_blocks: HashMap<BlockID, usize>,
+    #[serde(skip_serializing)]
+    #[serde(skip_deserializing)]
+    db: Option<Database>,
+    #[serde(skip_serializing)]
+    #[serde(skip_deserializing)]
+    env: Option<Environment>,
+    pub path: Option<String>,
 }
 
 impl Service for ServiceImpl {
     type Balance = u64;
 
     fn new() -> Self {
+        let tmp = TempDir::new(DIR_NAME).expect("failed to open tmpdir");
+        let path = tmp.into_path();
+        // println!("Path: {:}", &*path.to_str().unwrap());
+        let mut builder = Environment::new();
+        builder.set_max_dbs(16);
+
+        let env = builder.open(&*path).expect("failed to open env");
+        let db = env
+            .create_db(Some(DB_NAME), DatabaseFlags::empty())
+            .expect("failed to open db");
+        let path_str = &*path.to_string_lossy();
         Self {
             states: Vec::new(),
             chains: Vec::new(),
             leaf_blocks: HashMap::new(),
+            db: Some(db),
+            env: Some(env),
+            path: Some(path_str.to_string()),
+        }
+    }
+
+    /// Deserialize the blockchain data from a database.
+    fn from_db(dir: &str, db_filename: &str) -> Self {
+        let path = Path::new(dir);
+
+        let mut builder = Environment::new();
+        builder.set_max_dbs(16);
+
+        let env = builder.open(path).expect("failed to open env");
+        let db = env
+            .create_db(Some(db_filename), DatabaseFlags::empty())
+            .expect("failed to open db");
+        let rotxn = env.begin_ro_txn().expect("can't begin ro txn");
+        let rbytes = rotxn.get(db, &DATA_KEY).expect("failed to get key");
+        let rstr = std::str::from_utf8(rbytes).expect("failed to parse read bytes");
+        let service: Self = serde_json::from_str(rstr).expect("failed to deserialize");
+        Self {
+            states: service.states,
+            chains: service.chains,
+            leaf_blocks: service.leaf_blocks,
+            db: Some(db),
+            env: Some(builder.open(path).expect("failed to open env")),
+            path: service.path,
+        }
+    }
+
+    /// Serialize and write all blockchains into the database.
+    fn update_db(&mut self) {
+        let wbytes = serde_json::to_string(self).expect("failed to serialize");
+        if let Some(env) = &self.env {
+            let mut rwtxn = env.begin_rw_txn().expect("can't begin rw txn");
+            if let Some(db) = self.db {
+                rwtxn
+                    .put(db, &DATA_KEY, &wbytes, WriteFlags::empty())
+                    .expect("put failed");
+                rwtxn.commit().expect("commit failed for rwtxn");
+            }
         }
     }
 
@@ -113,33 +182,9 @@ impl Service for ServiceImpl {
                 self.chains[*idx].push(_block.clone());
                 self.leaf_blocks.insert(_block.block_id.clone(), *idx);
                 self.leaf_blocks.remove(&parent);
+                let last_state = self.states.last_mut().unwrap();
                 for tx in &_block.transactions {
-                    match tx {
-                        Transaction::Mint {
-                            tx_id: _,
-                            to,
-                            amount,
-                        } => {
-                            let last_state = self.states.last_mut().unwrap();
-                            let account = last_state.get_mut(to).unwrap();
-                            account.balance += amount;
-                        }
-                        Transaction::Transfer {
-                            tx_id: _,
-                            from,
-                            to,
-                            amount,
-                        } => {
-                            let balance = self.get_balance(from)?;
-                            if *amount <= balance {
-                                let last_state = self.states.last_mut().unwrap();
-                                let to_account = last_state.get_mut(to).unwrap();
-                                to_account.balance += amount;
-                                let from_account = last_state.get_mut(from).unwrap();
-                                from_account.balance -= amount;
-                            }
-                        }
-                    }
+                    state_transition(last_state, tx);
                 }
             } else {
                 // no leaf contains parent, search the previous blocks
@@ -180,6 +225,7 @@ impl Service for ServiceImpl {
             }
             self.states.push(new_state);
         }
+        self.update_db();
         anyhow::Ok(())
     }
 

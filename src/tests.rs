@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::blocks;
-    use crate::{Service, ServiceImpl};
+    use crate::{Service, ServiceImpl, DB_NAME};
 
     fn assert_balances<S: Service>(
         service: &S,
@@ -19,6 +19,19 @@ mod tests {
         } else {
             panic!("Bob's balance is not available!");
         }
+    }
+
+    #[test]
+    fn service_restart() {
+        let mut service = ServiceImpl::new();
+        service.ingest_block(&blocks::BLOCK_A).unwrap();
+        service.ingest_block(&blocks::BLOCK_B).unwrap();
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
+        // get temporary dir path.
+        let dir = service.path.unwrap();
+        // restart service.
+        let service = ServiceImpl::from_db(dir.as_str(), DB_NAME);
+        assert_balances(&service, anyhow::Ok(10), anyhow::Ok(0));
     }
 
     #[test]
