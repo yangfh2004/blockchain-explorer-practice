@@ -124,4 +124,14 @@ mod tests {
         service.ingest_block(&blocks::BLOCK_A).unwrap();
         assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
     }
+
+    #[test]
+    fn test_8(){
+        let mut service = ServiceImpl::new();
+        assert_balances(&service, anyhow::Ok(0), anyhow::Ok(0));
+        service.ingest_block(&blocks::BLOCK_A).unwrap();
+        assert_balances(&service, anyhow::Ok(5), anyhow::Ok(5));
+        service.ingest_block(&blocks::BLOCK_E).unwrap();
+        assert_balances(&service, anyhow::Ok(1), anyhow::Ok(7));
+    }
 }

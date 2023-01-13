@@ -55,7 +55,7 @@ pub struct Account {
     pub balance: u64,
 }
 
-#[derive(Default, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ServiceImpl {
     pub states: Vec<HashMap<String, Account>>,
     pub chains: Vec<Vec<Block>>,
@@ -226,6 +226,10 @@ impl Service for ServiceImpl {
             self.states.push(new_state);
         }
         self.update_db();
+        // dbg!("Block ID: ", &_block.block_id);
+        // dbg!("States: ", &self.states);
+        // dbg!("Chains: ", &self.chains);
+        // dbg!("Leaf nodes: ", &self.leaf_blocks);
         anyhow::Ok(())
     }
 
