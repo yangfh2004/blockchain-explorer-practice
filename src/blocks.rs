@@ -21,6 +21,23 @@ lazy_static! {
             },
         ],
     };
+    pub static ref BLOCK_E: Block = Block {
+        block_id: "E".to_string(),
+        parent_id: None,
+        transactions: vec![
+            Transaction::Mint {
+                tx_id: "A1".to_string(),
+                to: ALICE.to_string(),
+                amount: 8,
+            },
+            Transaction::Transfer {
+                tx_id: "A0".to_string(),
+                from: ALICE.to_string(),
+                to: BOB.to_string(),
+                amount: 7,
+            },
+        ],
+    };
     pub static ref BLOCK_B: Block = Block {
         block_id: "B".to_string(),
         parent_id: Some("A".to_string()),
